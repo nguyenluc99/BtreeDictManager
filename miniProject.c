@@ -1,23 +1,27 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-
+#include<math.h>
 #include "btree.h"
-#define maxLen 4
-#define maxNumWord 100
+#define maxLen 5
+#define maxNumWord 3000
 
-const char * toString(long num) {
-    char str[maxLen];
-    char tmp;
-    int iniPos = 0;
-    printf("Stảt");
-    while (num > 0) {
-        printf("%ld, '%s'", num, str);
-        tmp = num % 26;
-        strcat(str, tmp);
+char iniStr[maxLen];
+char* toString(long num) {
+    char ch, tmp;
+    char tmpStr[maxLen];
+    long iniPos = 0;
+    long i;
+    do {
+        tmpStr[iniPos] = num % 26 + 'a';
+        iniPos ++;
         num /= 26;
+        if (num == 0) break;
+    }  while (num > 0); 
+    for (i = 0; i < iniPos; i++){
+        iniStr[i] = tmpStr[iniPos - i - 1];
     }
-    return str;
+    return iniStr;
 }
 
 void generateData(BTA * book){
@@ -64,9 +68,15 @@ void auto_complete(){
 }
 
 int main(){
-    long n = 1000;
-    const char * somestr = toString(n);
-    printf("out string is %s\n", somestr);
+    long n, len = pow(26, maxLen), val;
+    for (n = 0; n < maxNumWord; n ++) {
+        printf("%5s", toString(len / maxNumWord * n));
+        if (n % 15 == 0) {
+            printf("\n");
+        }else 
+            printf("\t");
+    }
+    printf("\n");
     return 0;
     do{
         printf("===========MiniProject==========\n");
