@@ -3,6 +3,26 @@
 #include<string.h>
 
 #include "btree.h"
+#define maxLen 4
+#define maxNumWord 100
+
+const char * toString(long num) {
+    char str[maxLen];
+    char tmp;
+    int iniPos = 0;
+    printf("Stảt");
+    while (num > 0) {
+        printf("%ld, '%s'", num, str);
+        tmp = num % 26;
+        strcat(str, tmp);
+        num /= 26;
+    }
+    return str;
+}
+
+void generateData(BTA * book){
+
+}
 
 void auto_complete(){
     char *file ="auto_complete";
@@ -43,9 +63,11 @@ void auto_complete(){
     btcls(complete_tree);
 }
 
-
 int main(){
-    int n;
+    long n = 1000;
+    const char * somestr = toString(n);
+    printf("out string is %s\n", somestr);
+    return 0;
     do{
         printf("===========MiniProject==========\n");
         printf("|Options:                      |\n");
@@ -55,7 +77,7 @@ int main(){
         printf("|4.                            |\n");
         printf("================================\n");
         printf("Enter your choice:              \n");
-        scanf("%d", &n);
+        scanf("%ld", &n);
         while(getchar()!='\n');
         switch(n){
             case 1:
