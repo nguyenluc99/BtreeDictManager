@@ -10,7 +10,7 @@ const char * toString(long num) {
     char str[maxLen];
     char tmp;
     int iniPos = 0;
-    printf("Stảt");
+    printf("Start");
     while (num > 0) {
         printf("%ld, '%s'", num, str);
         tmp = num % 26;
