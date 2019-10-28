@@ -1,13 +1,14 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include <ncurses.h>
+#include<ncurses.h>
 #include<unistd.h> 
 #include<math.h>
 #include"btree.h"
 #define maxLen 4
 #define maxNumOfWord 20000
 #define iniWord 1000
+// gcc -o min miniProject.c -Lbt-5.0.0/lib -lbt -Ibt-5.0.0/inc -lncurses  
 char iniStr[maxLen];
 char* toString(long num) {
     char ch;
@@ -27,7 +28,7 @@ char* toString(long num) {
 }
 int kbhit(){
     int ch = getch();
-    printf("run, ch is %d\n", ch);
+    printw("run, ch is %d\n", ch);
     // if (ch != ERR) {
     if (ch != 9 && ch != 10 && ch != EOF) {
         ungetch(ch);
@@ -42,11 +43,12 @@ void generateData(BTA* dict){
     long i;
     for (i = 0; i < iniWord; i ++) {
         val = len / iniWord * i;
-        // printf("%5s", toString(val));
-        if (btins(dict, (char*)toString(val), (char*)&val,  sizeof(long)))
-            printf("Error insert key at value = %ld\n", val);
-        else printf("Success at value = %ld\n", val);
+        // printw("%5s", toString(val));
+        if (btins(dict, (char*)toString(val), (char*)&val,  sizeof(long))) {} // else printf(".");
+        //     printf("Error insert key at value = %ld\n", val);
+        // else printf("Success at value = %ld\n", val);
     }
+        // printf("Done\n");
 }
 
 long* addAWord(BTA* dict) {
@@ -61,18 +63,6 @@ long* addAWord(BTA* dict) {
     else printf("Success at value = %ld\n", val);
 }
 
-// void searchAWord(BTA* dict, char* key, char* data) {
-//     // long val;
-//     int size;
-//     if ( btsel(dict, key, (char*)&data, sizeof(long), &size) ) {
-//         printf("Not found number for %s!\n", key);
-//         // return NULL;
-//     }
-//     else{ 
-//         printf("Phone number of %s is %ld\n", key, (long)&data);
-//         // return val;
-//     }
-// }
 
 void auto_complete(){
     char *file ="auto_complete";
@@ -120,61 +110,65 @@ int main(){
     char ch;
     char nextKey[10];
     BTA * myDict;
-    btinit();
-    myDict = btopn("myDict", 0, 0);
-    if (!myDict) {
-        printf("create a book");
+    // myDict = btopn("myDict", 0, 0); 
+    // if (!myDict) {
+        // printf("create a book");
         myDict = btcrt("myDict", 0, 0);
         generateData(myDict);
-    }
+    // }
+    initscr();
+    btinit();
     do{
-        printf("===========MiniProject==========\n");
-        printf("|Options:                       |\n");
-        printf("|1. Add a word                  |\n");
-        printf("|2. Search a word               |\n");
-        printf("|3. Deleta a word               |\n");
-        printf("|4. Print the dict              |\n");
-        printf("|5. Quit                        |\n");
-        printf("================================\n");
-        printf("Enter your choice:              \n");
+        printw("===========MiniProject==========\n");
+        printw("|Options:                       |\n");
+        printw("|1. Add a word                  |\n");
+        printw("|2. Search a word               |\n");
+        printw("|3. Deleta a word               |\n");
+        printw("|4. Print the dict              |\n");
+        printw("|5. Quit                        |\n");
+        printw("================================\n");
+        printw("Enter your choice:              \n");
         scanf("%d", &n); while((ch = getchar())!='\n' && ch != EOF);
         switch(n){
             case 1: // Add a word
                 addAWord(myDict);
                 break;
             case 2: // 2. Search a word
-                printf("Insert a key to find\t");
+                printw("Insert a key to find\t");
                 scanf("%[^\n]%*c", key);
                 if (btsel(myDict, key, (char*)&tmpVal, sizeof(long), &size))
-                    printf("Key not found");
-                else printf("key %s has value %ld\n", key, tmpVal);
+                    printw("Key not found");
+                else printw("key %s has value %ld\n", key, tmpVal);
                 break;
             case 3: // 3. Delete a word
-                printf("Insert a key to delete\t");
+                printw("Insert a key to delete\t");
                 scanf("%[^\n]%*c", key);
                 if (btdel(myDict, key))
-                    printf("Error delete the key %s\n", key);
-                else printf("key %s deleted", key);
+                    printw("Error delete the key %s\n", key);
+                else printw("key %s deleted", key);
                 break;
             case 4: // 4. Print the dict
-                    printf("Insert a key to search\t");
+                    printw("Insert a key to search\t");
                     i = 0;
-                    // fflush(stdout);
-                    // scanf("\n");
-                    while(1) {
-                        if (kbhit()) {
-                            key[i] = getchar();
-                            printf("%d", i);
-                            i++;
-                        } else break;
+                    // while(1) {
+                    //     if (kbhit()) {
+                    //         key[i] = getchar();
+                    //         printw("%d", i);
+                    //         i++;
+                    //     } else break;
+                    // }
+                    while((ch == getch()) != '\t' && ch != '\n') {
+                        key[i] = ch;
+                        i ++;
+                        key[i] = '\0';
                     }
-                printf("key is '%s', len is %ld\n", key, strlen(key));
-                   btsel(myDict, key, (char*)&tmpVal, sizeof(long), &size);
+                printw("key is '%s', len is %ld\n", key, strlen(key));
+                btsel(myDict, key, (char*)&tmpVal, sizeof(long), &size);
 		   while ( !btseln(myDict, nextKey, (char*)&tmpVal, sizeof(long), &size) )
             {
                 if (memcmp(key, nextKey, strlen(key)) != 0) break;
-                printf("key is \t %s\n", nextKey);
-			    // printf("%s\t%10ld\n", nextKey, tmpVal);
+                printw("key is \t %s\n", nextKey);
+			    // printw("%s\t%10ld\n", nextKey, tmpVal);
             }	
                    break;
             case 5 :
@@ -183,5 +177,6 @@ int main(){
         }
     }while(n!=5);
     btcls(myDict);
+    endwin();
     return 0;
 }
