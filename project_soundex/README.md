@@ -1,0 +1,1 @@
+compile:  gcc miniProject_1.c -Lbt-5.0.0/lib -lbt -Ibt-5.0.0/inc
