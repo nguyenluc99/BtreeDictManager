@@ -30,12 +30,12 @@ int main(){
     char nextKey[10], iniStr[MAX_LEN], key[10], ch;
     long tmpVal, *tmpPointer;
     int n = 0, size, i, j;
-    // myDict = btopn("myDict", 0, 0); 
-    // if (!myDict) {
+    myDict = btopn("myDict", 0, 0); 
+    if (!myDict) {
         printf("create a book");
         myDict = btcrt("myDict", 0, 0);  
         generateData(myDict, iniStr);
-    // }
+    }
     while (n != 5 ) {
         menu();
         scanf("%d%*c", &n);
