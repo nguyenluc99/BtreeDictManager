@@ -26,43 +26,40 @@ void menu();
 
 int main(){
     btinit();
-    BTA * myDict;
-    char nextKey[10], iniStr[MAX_LEN], key[10], ch;
+    char ch;
     long tmpVal, *tmpPointer;
-    int n = 0, size, i, j;
-    myDict = btopn("myDict", 0, 0); 
+    int n, size, size2, i, j, found;
+    BTA * myDict;
+    n = 0;
+    char *nextKey = (char*)malloc(10 * sizeof(char));
+    char *key = (char*)malloc(10 * sizeof(char));
+    char *iniStr = (char*)malloc(MAX_LEN * sizeof(char));
+    myDict = btopn("dict", 0, 0); 
     if (!myDict) {
-        printf("create a book");
-        myDict = btcrt("myDict", 0, 0);  
+        printf("create a book\n");
+        myDict = btcrt("dict", 0, 0);  
         generateData(myDict, iniStr);
     }
-    while (n != 5 ) {
+    while (n != 6 ) {
         menu();
         scanf("%d%*c", &n);
-        printf("got %d \n", n);
+        strcpy(key,"");
+        strcpy(nextKey,"");
         switch(n){
             case 1: // Add a word
                 printf("add word");
                 addAWord(myDict);
                 break;
             case 2: // 2. Search a word
-                printf("Insert a key to find\t");
-                scanf("%[^\n]%*c", key);
-                if (btsel(myDict, key, (char*)&tmpVal, sizeof(long), &size))
-                    printf("Key not found");
-                else printf("key %s has value %ld\n", key, tmpVal);
-                break;
-            case 3: // 3. Delete a word
-                printf("Insert a key to delete\t");
-                scanf("%[^\n]%*c", key);
-                if (btdel(myDict, key))
-                    printf("Error delete the key %s\n", key);
-                else printf("key %s deleted", key);
-                break;
-            case 4: // 4. Print the dict
+                // printf("Insert a key to find\t");
+                // scanf("%[^\n]%*c", key);
+                // if (btsel(myDict, key, (char*)&tmpVal, sizeof(long), &size))
+                //     printf("Key not found");
+                // else printf("key %s has value %ld\n", key, tmpVal);
                 printf("%s","Insert a key to search\t");
                 j = 0;
                 i = 0;
+                found = 0;
                 while (1){
                     char c = getch();
                     if ((c != 9) && (c != 10) && (c != 27) && (c != 127)){
@@ -76,24 +73,42 @@ int main(){
                         key[i--] = '\0';
                         j--;
                     }
-                    if (c==9 || c==10) break;
+                    if (c==9) { printf("\n");break;}
+                    else if (c==10) break;
                 }
                 key[i] = '\0';
                 printf("\n");
-                printf("key is '%s', len is %ld\n", key, strlen(key));
-                btsel(myDict, key, (char*)&tmpVal, sizeof(long), &size);
-                // printf("not Found\t");
-                strcpy(nextKey, key);
-                while (!btseln(myDict, nextKey, (char*)&tmpVal, sizeof(long), &size) )
+                // printf("key to search is '%s'\n", key);
+                if (strlen(key)){
+                    btsel(myDict, key, (char*)&tmpVal, sizeof(long), &size);
+                    while (!btseln(myDict, nextKey, (char*)&tmpVal, sizeof(long), &size2))
                     {
-                        // printf("Found\t");
                         if (memcmp(key, nextKey, strlen(key)) != 0) break;
-                        printf("%s\t", nextKey);
-                        // printw("%s\t%10ld\n", nextKey, tmpVal);
+                        printf("'%s' has value %ld \t", nextKey, tmpVal);
+                        found = 1;
                     }	
-                // printf("not Found2222\t");
+                    if (!found) printf("keyword not found\n");
+                } else printf("Please insert somethin to search\n");
+                break;
+            case 3: // 3. Delete a word
+                printf("Insert a key to delete\t");
+                scanf("%[^\n]%*c", key);
+                if (btdel(myDict, key))
+                    printf("Error delete the key %s\n", key);
+                else printf("key %s deleted", key);
+                break;
+            case 4: // 4. Print the dict
+                strcpy(key, "");
+                btsel(myDict, key, (char*)&tmpVal, sizeof(long), &size);
+                while (!btseln(myDict, nextKey, (char*)&tmpVal, sizeof(long), &size2))
+                {
+                    printf("'%s' has value %ld \t", nextKey, tmpVal);
+                }	
                 break;
             case 5 :
+
+                break;
+            case 6 :
                 printf("You type to out\n");
                 break;
         }
@@ -110,12 +125,9 @@ void initTermios(int echo) {
   tcsetattr(0, TCSANOW, &new); //apply terminal io settings
 }
  
-/* Restore old terminal i/o settings */
 void resetTermios(void) {
   tcsetattr(0, TCSANOW, &old);
 }
- 
-/* Read 1 character - echo defines echo mode */
 char getch_(int echo) {
   char ch;
   initTermios(echo);
@@ -123,24 +135,19 @@ char getch_(int echo) {
   resetTermios();
   return ch;
 }
- 
-/* 
-Read 1 character without echo 
-getch() function definition.
-*/
 char getch(void) {
   return getch_(0);
 }
 char* toString(long num, char* iniStr){
     char ch;
-    int re;
+    long re;
     char tmpStr[MAX_LEN];
     long iniPos = 0;
     long i;
     do {
-        re = num % 27 + 'a';
+        re = num % 27;
         if (re != 0){
-            tmpStr[iniPos] = re + 'a';
+            tmpStr[iniPos] = re + 'a' - 1;
             iniPos ++;
         }
         num /= 27;
@@ -153,17 +160,12 @@ char* toString(long num, char* iniStr){
     return iniStr;
 }
 void generateData(BTA* dict, char* iniStr){
-    
-    long len, val;
+    long len = pow(26, MAX_LEN), val;
     long i;
-    printf("Start");
     for (i = 0; i < INI_WORD; i ++) {
         val = len / INI_WORD * i;
-        if (btins(dict, (char*)toString(val, iniStr), (char*)&val,  sizeof(long))) {} // else printf(".");
-        //     printf("Error insert key at value = %ld\n", val);
-        // else printf("Success at value = %ld\n", val);
+        btins(dict, (char*)toString(val, iniStr), (char*)&val,  sizeof(long));
     }
-        printf("Done\n");
 }
 void addAWord(BTA* dict){
     char key[10];
@@ -183,7 +185,8 @@ void menu() {
     printf("|2. Search a word               |\n"); 
     printf("|3. Deleta a word               |\n"); 
     printf("|4. Print the dict              |\n"); 
-    printf("|5. Quit                        |\n"); 
+    printf("|5. Suggesstion search          |\n"); 
+    printf("|6. Quit                        |\n"); 
     printf("================================\n"); 
     printf("Enter your choice:              \n"); 
 }
